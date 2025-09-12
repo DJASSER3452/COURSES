@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Application de Vérification Véhicule</title>
+    <title>Omar SEV</title>
+    <!-- Added Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
         /* Added stunning animations, modern styling, and beautiful graphics */
         @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap');
@@ -1084,11 +1088,189 @@
             </div>
         </div>
 
-        <!-- Home Screen -->
-        <div id="home-screen" class="screen">
+        <!-- Added comprehensive inspection form screen -->
+        <div id="inspection-form-screen" class="screen">
             <div class="header">
                 <div class="header-left">
-                    <h1 class="header-title" id="home-title">Accueil</h1>
+                    <button class="btn btn-ghost btn-sm" onclick="logout()">
+                        <span class="icon icon-arrow-left"></span>
+                    </button>
+                    <h1 class="header-title" id="inspection-form-title">Rapport d'inspection de base du véhicule au Québec</h1>
+                </div>
+                <div class="header-right">
+                    <button id="language-toggle-inspection" class="btn btn-ghost btn-sm">
+                        <span class="icon icon-languages"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-content">
+                <div class="card mb-4">
+                    <h3 class="text-lg font-semibold mb-4" id="inspection-info-title">Informations de l'inspection</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="input-group">
+                            <label class="label" for="inspection-email" id="inspection-email-label">Email *</label>
+                            <input type="email" id="inspection-email" class="input" required>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="label" for="inspection-date" id="inspection-date-label">Date de l'inspection *</label>
+                            <input type="date" id="inspection-date" class="input" required>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="label" for="inspection-time" id="inspection-time-label">Heure de l'inspection *</label>
+                            <input type="time" id="inspection-time" class="input" required>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="label" for="driver-name-inspection" id="driver-name-inspection-label">Nom et prénom du chauffeur</label>
+                            <input type="text" id="driver-name-inspection" class="input">
+                        </div>
+
+                        <div class="input-group">
+                            <label class="label" for="government-accessory" id="government-accessory-label">Numéro de l'accessoire gouvernemental (attestation de véhicule autorisé)</label>
+                            <input type="text" id="government-accessory" class="input">
+                        </div>
+
+                        <div class="input-group">
+                            <label class="label" for="odometer-inspection" id="odometer-inspection-label">Lecture du Kilométrage sur l'odomètre *</label>
+                            <input type="number" id="odometer-inspection" class="input" required>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="label" for="taxi-license" id="taxi-license-label">Numéro du permis de conduire du chauffeur de taxi</label>
+                            <input type="text" id="taxi-license" class="input">
+                        </div>
+
+                        <div class="input-group">
+                            <label class="label" for="saaq-number" id="saaq-number-label">Numéro de dossier SAAQ (permis de conduire)</label>
+                            <input type="text" id="saaq-number" class="input">
+                        </div>
+
+                        <div class="input-group">
+                            <label class="label" for="vehicle-plate" id="vehicle-plate-label">Numéro de plaque du véhicule</label>
+                            <input type="text" id="vehicle-plate" class="input">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <h3 class="text-lg font-semibold mb-4" id="defects-title">Description des défauts constatés lors de l'inspection</h3>
+                    
+                    <div class="space-y-3">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="defect-tires" class="checkbox">
+                            <label for="defect-tires" class="checkbox-label" id="defect-tires-label">Pneus</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="defect-tire-valves" class="checkbox">
+                            <label for="defect-tire-valves" class="checkbox-label" id="defect-tire-valves-label">Valves des pneus</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="defect-lights" class="checkbox">
+                            <label for="defect-lights" class="checkbox-label" id="defect-lights-label">Phares et feux</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="defect-brake-fluid" class="checkbox">
+                            <label for="defect-brake-fluid" class="checkbox-label" id="defect-brake-fluid-label">Niveau du liquide de freinage</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="defect-seat-belt" class="checkbox">
+                            <label for="defect-seat-belt" class="checkbox-label" id="defect-seat-belt-label">Rallonge de la ceinture de sécurité</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="defect-battery" class="checkbox">
+                            <label for="defect-battery" class="checkbox-label" id="defect-battery-label">Charge de la batterie (si-électrique)</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="defect-dashboard" class="checkbox">
+                            <label for="defect-dashboard" class="checkbox-label" id="defect-dashboard-label">Voyant lumineux tableau de bord</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="defect-wipers" class="checkbox">
+                            <label for="defect-wipers" class="checkbox-label" id="defect-wipers-label">Essuie-glaces et lave-glace</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="defect-geolocation" class="checkbox">
+                            <label for="defect-geolocation" class="checkbox-label" id="defect-geolocation-label">Système de géolocalisation</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="defect-lantern" class="checkbox">
+                            <label for="defect-lantern" class="checkbox-label" id="defect-lantern-label">Lanternon (si Taxi)</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="defect-mirrors" class="checkbox">
+                            <label for="defect-mirrors" class="checkbox-label" id="defect-mirrors-label">Rétroviseurs</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="defect-parking-brake" class="checkbox">
+                            <label for="defect-parking-brake" class="checkbox-label" id="defect-parking-brake-label">Frein de stationnement</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <h3 class="text-lg font-semibold mb-4" id="adapted-vehicle-title">Véhicule adapté (si applicable)</h3>
+                    
+                    <div class="space-y-3">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="adapted-ramp" class="checkbox">
+                            <label for="adapted-ramp" class="checkbox-label" id="adapted-ramp-label">Rampe ou plateforme élévatrice</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="adapted-immobilization" class="checkbox">
+                            <label for="adapted-immobilization" class="checkbox-label" id="adapted-immobilization-label">Dispositif d'immobilisation</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="input-group">
+                        <label class="label" for="dashboard-reason" id="dashboard-reason-label">Le cas échéant, quelle est la raison pour laquelle un indicateur du tableau de bord est allumé?</label>
+                        <textarea id="dashboard-reason" class="textarea" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="card mb-6">
+                    <div class="input-group">
+                        <label class="label" for="defect-description" id="defect-description-label">Description des défectuosités constatées lors de la vérification</label>
+                        <textarea id="defect-description" class="textarea" rows="4"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="logout()">
+                        <span class="icon icon-x"></span>
+                        <span id="cancel-inspection">Annuler</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="submitInspectionForm()">
+                        <span class="icon icon-check"></span>
+                        <span id="submit-inspection">Soumettre</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home Screen -->
+        <div id="home-screen" class="screen">
+            <!-- Updated header title to Omar SEV -->
+            <div class="header">
+                <div class="header-left">
+                    <h1 class="header-title" id="home-title">Omar SEV</h1>
                 </div>
                 <div class="header-right">
                     <button id="language-toggle" class="btn btn-ghost btn-sm">
@@ -1107,53 +1289,97 @@
                     <p class="welcome-name" id="current-user-name"></p>
                 </div>
 
+                <!-- Updated icons for each menu button with appropriate SVG icons -->
                 <button class="menu-button" onclick="showScreen('verification-form')">
-                    <span class="icon icon-car menu-icon"></span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
+                        <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
+                        <path d="M12 3c0 1-1 3-3 3s-3-2-3-3 1-3 3-3 3 2 3 3"/>
+                        <path d="M12 21c0-1 1-3 3-3s3 2 3 3-1 3-3 3-3-2-3-3"/>
+                    </svg>
                     <span id="add-certificate">Ajouter Certificat</span>
                 </button>
 
                 <button class="menu-button" onclick="showScreen('verification-list')">
-                    <span class="icon icon-file menu-icon"></span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10,9 9,9 8,9"/>
+                    </svg>
                     <span id="transactions">Transactions</span>
                 </button>
 
-                <!-- Added onclick handlers for remaining menu buttons -->
                 <button class="menu-button" onclick="showScreen('batch-retransmit')">
-                    <span class="icon icon-file menu-icon"></span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17,8 12,3 7,8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                        <circle cx="18" cy="5" r="3"/>
+                    </svg>
                     <span id="retransmit-batch">Retransmettre les transactions en lot</span>
                 </button>
 
                 <button class="menu-button" onclick="showScreen('synchronization')">
-                    <span class="icon icon-file menu-icon"></span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6"/>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                        <circle cx="12" cy="12" r="1"/>
+                    </svg>
                     <span id="synchronization">Synchronisation B.O. Imoove</span>
                 </button>
 
                 <button class="menu-button" onclick="showScreen('reports-documents')">
-                    <span class="icon icon-file menu-icon"></span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                        <path d="M16 13H8"/>
+                        <path d="M16 17H8"/>
+                        <path d="M10 9H8"/>
+                    </svg>
                     <span id="reports-documents">Rapports & Documents</span>
                 </button>
 
                 <button class="menu-button" onclick="showScreen('export-data')">
-                    <span class="icon icon-file menu-icon"></span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7,10 12,15 17,10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                        <path d="M3 6h18"/>
+                    </svg>
                     <span id="export-data">Exporter les données du SEV</span>
                 </button>
 
                 <button class="menu-button" onclick="showScreen('configuration')">
-                    <span class="icon icon-settings menu-icon"></span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v6m0 6v6"/>
+                        <path d="M21 12h-6m-6 0H3"/>
+                        <path d="M19.07 4.93l-4.24 4.24m-5.66 0L4.93 4.93"/>
+                        <path d="M19.07 19.07l-4.24-4.24m-5.66 0l-4.24 4.24"/>
+                    </svg>
                     <span id="configuration">Configuration</span>
                 </button>
 
                 <button class="menu-button" onclick="showScreen('verification-list')">
-                    <span class="icon icon-check menu-icon"></span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"/>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
                     <span id="pre-dep-verification">Vérification avant départ</span>
                 </button>
 
                 <button class="menu-button amber" onclick="logout()">
-                    <span class="icon icon-logout menu-icon"></span>
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16,17 21,12 16,7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
                     <span id="logout-text">Déconnexion</span>
                 </button>
             </div>
-        </div>
 
         <!-- Verification Form Screen -->
         <div id="verification-form-screen" class="screen">
@@ -1646,6 +1872,21 @@
     </div>
 
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSuec1D4ydCEP173J6FBwrQ1OnKLsYtLM",
+            authDomain: "omar-73dc3.firebaseapp.com",
+            projectId: "omar-73dc3",
+            storageBucket: "omar-73dc3.firebasestorage.app",
+            messagingSenderId: "511676857911",
+            appId: "1:511676857911:web:2a471573147479dd8ec9b2",
+            measurementId: "G-0WR2Q4CLRQ"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
         // Application State
         let currentScreen = 'login';
         let currentLanguage = 'fr';
@@ -1653,6 +1894,7 @@
         let currentUser = '';
         let selectedRecords = [];
         let selectedRecord = null;
+        let inspectionFormCompleted = false; // Added inspection form completion tracking
 
         // Verification Items
         let verificationItems = [
@@ -1700,15 +1942,36 @@
             }
         ];
 
-        // Translations
         const translations = {
             fr: {
-                login: 'Connexion',
+                // Existing translations...
+                loginTitle: 'Connexion',
+                loginSubtitle: 'Bienvenue',
                 driverName: 'Nom du chauffeur',
                 password: 'Mot de passe',
-                loginButton: 'Se connecter',
-                loginError: 'Nom d\'utilisateur ou mot de passe incorrect',
-                welcome: 'Bienvenue',
+                login: 'Se connecter',
+                loginError: 'Veuillez entrer un nom d\'utilisateur et un mot de passe valides',
+                
+                // Inspection form translations
+                inspectionFormTitle: 'Rapport d\'inspection de base du véhicule au Québec',
+                inspectionInfoTitle: 'Informations de l\'inspection',
+                inspectionEmailLabel: 'Email',
+                inspectionDateLabel: 'Date de l\'inspection',
+                inspectionTimeLabel: 'Heure de l\'inspection',
+                driverNameInspectionLabel: 'Nom et prénom du chauffeur',
+                governmentAccessoryLabel: 'Numéro de l\'accessoire gouvernemental',
+                odometerInspectionLabel: 'Lecture du Kilométrage sur l\'odomètre',
+                taxiLicenseLabel: 'Numéro du permis de conduire du chauffeur de taxi',
+                saaqNumberLabel: 'Numéro de dossier SAAQ',
+                vehiclePlateLabel: 'Numéro de plaque du véhicule',
+                defectsTitle: 'Description des défauts constatés',
+                adaptedVehicleTitle: 'Véhicule adapté (si applicable)',
+                dashboardReasonLabel: 'Raison pour laquelle un indicateur du tableau de bord est allumé',
+                defectDescriptionLabel: 'Description des défectuosités constatées',
+                cancelInspection: 'Annuler',
+                submitInspection: 'Soumettre',
+                
+                // Existing translations continue...
                 home: 'Accueil',
                 addCertificate: 'Ajouter Certificat',
                 transactions: 'Transactions',
@@ -1754,9 +2017,9 @@
                 lastSync: 'Dernière synchronisation:',
                 startRetransmit: 'Démarrer la retransmission',
                 syncTitle: 'Synchronisation B.O.',
-                syncVerifications: 'Synchroniser les vérifications',
-                syncReports: 'Synchroniser les rapports',
-                syncSettings: 'Synchroniser les paramètres',
+                syncVerifications: 'Mise à jour des vérifications',
+                syncReports: 'Mise à jour des rapports',
+                syncSettings: 'Mise à jour des paramètres',
                 startSync: 'Démarrer la synchronisation',
                 reportsTitle: 'Rapports & Documents',
                 dailyReports: 'Rapports quotidiens',
@@ -1784,12 +2047,32 @@
                 resetSettings: 'Réinitialiser les paramètres'
             },
             ar: {
-                login: 'تسجيل الدخول',
+                // Arabic translations for inspection form
+                inspectionFormTitle: 'تقرير فحص المركبة الأساسي في كيبيك',
+                inspectionInfoTitle: 'معلومات الفحص',
+                inspectionEmailLabel: 'البريد الإلكتروني',
+                inspectionDateLabel: 'تاريخ الفحص',
+                inspectionTimeLabel: 'وقت الفحص',
+                driverNameInspectionLabel: 'اسم السائق الكامل',
+                governmentAccessoryLabel: 'رقم الملحق الحكومي',
+                odometerInspectionLabel: 'قراءة عداد المسافات',
+                taxiLicenseLabel: 'رقم رخصة قيادة سائق التاكسي',
+                saaqNumberLabel: 'رقم ملف SAAQ',
+                vehiclePlateLabel: 'رقم لوحة المركبة',
+                defectsTitle: 'وصف العيوب المكتشفة',
+                adaptedVehicleTitle: 'مركبة معدلة (إن أمكن)',
+                dashboardReasonLabel: 'سبب إضاءة مؤشر لوحة القيادة',
+                defectDescriptionLabel: 'وصف العيوب المكتشفة أثناء التحقق',
+                cancelInspection: 'إلغاء',
+                submitInspection: 'إرسال',
+                
+                // Existing Arabic translations...
+                loginTitle: 'تسجيل الدخول',
+                loginSubtitle: 'مرحباً',
                 driverName: 'اسم السائق',
                 password: 'كلمة المرور',
-                loginButton: 'تسجيل الدخول',
-                loginError: 'اسم المستخدم أو كلمة المرور غير صحيحة',
-                welcome: 'مرحباً',
+                login: 'تسجيل الدخول',
+                loginError: 'يرجى إدخال اسم مستخدم وكلمة مرور صحيحين',
                 home: 'الرئيسية',
                 addCertificate: 'إضافة شهادة',
                 transactions: 'المعاملات',
@@ -1835,9 +2118,9 @@
                 lastSync: 'آخر مزامنة:',
                 startRetransmit: 'بدء إعادة الإرسال',
                 syncTitle: 'مزامنة B.O.',
-                syncVerifications: 'مزامنة عمليات التحقق',
-                syncReports: 'مزامنة التقارير',
-                syncSettings: 'مزامنة الإعدادات',
+                syncVerifications: 'تحديث عمليات التحقق',
+                syncReports: 'تحديث التقارير',
+                syncSettings: 'تحديث الإعدادات',
                 startSync: 'بدء المزامنة',
                 reportsTitle: 'التقارير والمستندات',
                 dailyReports: 'التقارير اليومية',
@@ -1871,37 +2154,84 @@
             return translations[currentLanguage][key] || key;
         }
 
-        // Show screen function
         function showScreen(screenName) {
-            // Hide all screens
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
+            console.log("[v0] Switching to screen:", screenName);
             
-            // Show target screen
-            document.getElementById(screenName + '-screen').classList.add('active');
-            currentScreen = screenName;
+            try {
+                // Hide all screens
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.remove('active');
+                });
 
-            // Update content based on screen
-            if (screenName === 'verification-list') {
-                renderVerificationList();
-            } else if (screenName === 'verification-form') {
-                renderVerificationForm();
-            } else if (screenName === 'verification-results') {
-                renderVerificationResults();
+                // Show target screen
+                const targetScreen = document.getElementById(screenName + '-screen');
+                if (targetScreen) {
+                    targetScreen.classList.add('active');
+                    
+                    // Initialize screen-specific content
+                    switch(screenName) {
+                        case 'verification-list':
+                            console.log("[v0] Initializing verification list");
+                            setTimeout(() => {
+                                renderVerificationList();
+                            }, 100); // Small delay to ensure DOM is ready
+                            break;
+                        case 'verification-form':
+                            console.log("[v0] Initializing verification form");
+                            setTimeout(() => {
+                                renderVerificationForm();
+                                updateLanguage();
+                            }, 100);
+                            break;
+                        case 'verification-results':
+                            console.log("[v0] Initializing verification results");
+                            setTimeout(() => {
+                                renderVerificationResults();
+                            }, 100);
+                            break;
+                        default:
+                            updateLanguage();
+                    }
+                } else {
+                    console.error("[v0] Screen not found:", screenName);
+                }
+            } catch (error) {
+                console.error("[v0] Error switching screens:", error);
             }
         }
 
-        // Login function
         function login() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
             
+            console.log('[v0] Login attempt for user:', username);
+            
+            // Simple validation (you can enhance this)
             if (username && password) {
-                currentUser = username;
                 isLoggedIn = true;
+                currentUser = username;
+                
+                // Save login state to localStorage for persistence
+                localStorage.setItem('omarSevLoggedIn', 'true');
+                localStorage.setItem('omarSevUser', username);
+                
                 document.getElementById('login-error').classList.add('hidden');
-                showScreen('home');
+                
+                // Remove this line after testing if you want to keep completion status
+                localStorage.removeItem('omarSevInspectionCompleted');
+                
+                // Check if inspection form was completed
+                const inspectionCompleted = localStorage.getItem('omarSevInspectionCompleted');
+                console.log('[v0] Inspection completed status:', inspectionCompleted);
+                
+                if (inspectionCompleted === 'true') {
+                    console.log('[v0] Showing home screen - inspection already completed');
+                    showScreen('home');
+                } else {
+                    console.log('[v0] Showing inspection form - not completed yet');
+                    showScreen('inspection-form');
+                }
+                
                 updateUserDisplay();
             } else {
                 document.getElementById('login-error').textContent = t('loginError');
@@ -1909,20 +2239,100 @@
             }
         }
 
-        // Logout function
-        function logout() {
-            isLoggedIn = false;
-            currentUser = '';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            showScreen('login');
+        function submitInspectionForm() {
+            const email = document.getElementById('inspection-email').value;
+            const date = document.getElementById('inspection-date').value;
+            const time = document.getElementById('inspection-time').value;
+            const odometer = document.getElementById('odometer-inspection').value;
+            
+            if (!email || !date || !time || !odometer) {
+                alert(currentLanguage === 'fr' ? 'Veuillez remplir tous les champs obligatoires (*)' : 'يرجى ملء جميع الحقول المطلوبة (*)');
+                return;
+            }
+            
+            const formData = {
+                email: email,
+                date: date,
+                time: time,
+                driverName: document.getElementById('driver-name-inspection').value || currentUser,
+                governmentAccessory: document.getElementById('government-accessory').value,
+                odometer: odometer,
+                taxiLicense: document.getElementById('taxi-license').value,
+                saaqNumber: document.getElementById('saaq-number').value,
+                vehiclePlate: document.getElementById('vehicle-plate').value,
+                dashboardReason: document.getElementById('dashboard-reason').value,
+                defectDescription: document.getElementById('defect-description').value,
+                defects: {
+                    tires: document.getElementById('defect-tires').checked,
+                    tireValves: document.getElementById('defect-tire-valves').checked,
+                    lights: document.getElementById('defect-lights').checked,
+                    brakeFluid: document.getElementById('defect-brake-fluid').checked,
+                    seatBelt: document.getElementById('defect-seat-belt').checked,
+                    battery: document.getElementById('defect-battery').checked,
+                    dashboard: document.getElementById('defect-dashboard').checked,
+                    wipers: document.getElementById('defect-wipers').checked,
+                    geolocation: document.getElementById('defect-geolocation').checked,
+                    lantern: document.getElementById('defect-lantern').checked,
+                    mirrors: document.getElementById('defect-mirrors').checked,
+                    parkingBrake: document.getElementById('defect-parking-brake').checked
+                },
+                adaptedVehicle: {
+                    ramp: document.getElementById('adapted-ramp').checked,
+                    immobilization: document.getElementById('adapted-immobilization').checked
+                },
+                timestamp: new Date().toISOString(),
+                userId: currentUser
+            };
+
+            console.log('[v0] Submitting inspection form:', formData);
+
+            // Save to Firebase
+            if (db) {
+                db.collection('inspectionForms').add(formData)
+                    .then((docRef) => {
+                        console.log('[v0] Inspection form saved with ID: ', docRef.id);
+                        localStorage.setItem('omarSevInspectionCompleted', 'true');
+                        showScreen('home');
+                    })
+                    .catch((error) => {
+                        console.error('[v0] Error saving inspection form: ', error);
+                        // Still proceed to home screen even if Firebase fails
+                        localStorage.setItem('omarSevInspectionCompleted', 'true');
+                        showScreen('home');
+                    });
+            } else {
+                // If Firebase is not available, just save locally and proceed
+                console.log('[v0] Firebase not available, saving locally');
+                localStorage.setItem('omarSevInspectionCompleted', 'true');
+                localStorage.setItem('omarSevInspectionData', JSON.stringify(formData));
+                showScreen('home');
+            }
         }
 
-        // Update user display
-        function updateUserDisplay() {
-            document.getElementById('current-user-name').textContent = currentUser;
-            document.getElementById('form-user-name').textContent = currentUser;
-            document.getElementById('results-user-name').textContent = currentUser;
+        function checkPersistentLogin() {
+            const savedLogin = localStorage.getItem('omarSevLoggedIn');
+            const savedUser = localStorage.getItem('omarSevUser');
+            
+            console.log('[v0] Checking persistent login:', savedLogin, savedUser);
+            
+            if (savedLogin === 'true' && savedUser) {
+                currentUser = savedUser;
+                isLoggedIn = true;
+                
+                const inspectionCompleted = localStorage.getItem('omarSevInspectionCompleted');
+                console.log('[v0] Persistent login - inspection completed:', inspectionCompleted);
+                
+                if (inspectionCompleted === 'true') {
+                    showScreen('home');
+                } else {
+                    showScreen('inspection-form');
+                }
+                
+                updateUserDisplay();
+            } else {
+                console.log('[v0] No persistent login found, showing login screen');
+                showScreen('login');
+            }
         }
 
         // Toggle language
@@ -1930,18 +2340,36 @@
             currentLanguage = currentLanguage === 'fr' ? 'ar' : 'fr';
             document.documentElement.setAttribute('dir', currentLanguage === 'ar' ? 'rtl' : 'ltr');
             document.documentElement.setAttribute('lang', currentLanguage);
-            updateTranslations();
+            updateLanguage();
         }
 
-        // Update translations
-        function updateTranslations() {
+        function updateLanguage() {
             // Login screen
-            document.getElementById('login-title').textContent = t('login');
-            document.getElementById('login-subtitle').textContent = t('welcome');
+            document.getElementById('login-title').textContent = t('loginTitle');
+            document.getElementById('login-subtitle').textContent = t('loginSubtitle');
             document.getElementById('username-label').textContent = t('driverName');
             document.getElementById('password-label').textContent = t('password');
-            document.getElementById('login-btn').textContent = t('loginButton');
+            document.getElementById('login-btn').textContent = t('login');
             document.getElementById('language-text').textContent = currentLanguage === 'fr' ? 'العربية' : 'Français';
+
+            // Inspection form screen
+            document.getElementById('inspection-form-title').textContent = t('inspectionFormTitle');
+            document.getElementById('inspection-info-title').textContent = t('inspectionInfoTitle');
+            document.getElementById('inspection-email-label').textContent = t('inspectionEmailLabel');
+            document.getElementById('inspection-date-label').textContent = t('inspectionDateLabel');
+            document.getElementById('inspection-time-label').textContent = t('inspectionTimeLabel');
+            document.getElementById('driver-name-inspection-label').textContent = t('driverNameInspectionLabel');
+            document.getElementById('government-accessory-label').textContent = t('governmentAccessoryLabel');
+            document.getElementById('odometer-inspection-label').textContent = t('odometerInspectionLabel');
+            document.getElementById('taxi-license-label').textContent = t('taxiLicenseLabel');
+            document.getElementById('saaq-number-label').textContent = t('saaqNumberLabel');
+            document.getElementById('vehicle-plate-label').textContent = t('vehiclePlateLabel');
+            document.getElementById('defects-title').textContent = t('defectsTitle');
+            document.getElementById('adapted-vehicle-title').textContent = t('adaptedVehicleTitle');
+            document.getElementById('dashboard-reason-label').textContent = t('dashboardReasonLabel');
+            document.getElementById('defect-description-label').textContent = t('defectDescriptionLabel');
+            document.getElementById('cancel-inspection').textContent = t('cancelInspection');
+            document.getElementById('submit-inspection').textContent = t('submitInspection');
 
             // Home screen
             document.getElementById('home-title').textContent = t('home');
@@ -2040,7 +2468,7 @@
             if (currentScreen === 'verification-form') {
                 renderVerificationForm();
             } else if (currentScreen === 'verification-list') {
-                renderVerificationList();
+                debouncedRenderVerificationList();
             } else if (currentScreen === 'verification-results') {
                 renderVerificationResults();
             } else if (currentScreen === 'verification-report') {
@@ -2111,7 +2539,15 @@
 
         // Render verification list
         function renderVerificationList() {
+            console.log("[v0] Rendering verification list, records count:", verificationRecords.length);
+            
             const container = document.getElementById('verification-records');
+            if (!container) {
+                console.log("[v0] Container not found");
+                return;
+            }
+            
+            // Clear container first
             container.innerHTML = '';
 
             // Show/hide selection controls
@@ -2140,15 +2576,21 @@
                 selectionControls.classList.add('hidden');
             }
 
+            // Create document fragment for better performance
+            const fragment = document.createDocumentFragment();
+
             verificationRecords.forEach(record => {
                 const div = document.createElement('div');
                 div.className = 'verification-item';
+                
+                const isSelected = selectedRecords.includes(record.id);
+                
                 div.innerHTML = `
                     <div class="verification-header">
                         <div class="checkbox-container">
-                            <div class="checkbox ${selectedRecords.includes(record.id) ? 'checked' : ''}" onclick="toggleRecordSelection('${record.id}')"></div>
+                            <div class="checkbox ${isSelected ? 'checked' : ''}" data-record-id="${record.id}"></div>
                         </div>
-                        <div class="verification-content" onclick="viewRecordReport('${record.id}')">
+                        <div class="verification-content" data-record-id="${record.id}">
                             <div class="verification-info">
                                 <div>
                                     <div class="verification-number">SAAQ# ${record.saaqNumber}</div>
@@ -2161,43 +2603,95 @@
                         </div>
                     </div>
                 `;
-                container.appendChild(div);
+                
+                // Add event listeners after creating the element
+                const checkbox = div.querySelector('.checkbox');
+                const content = div.querySelector('.verification-content');
+                
+                if (checkbox) {
+                    checkbox.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        toggleRecordSelection(record.id);
+                    });
+                }
+                
+                if (content) {
+                    content.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        viewRecordReport(record.id);
+                    });
+                }
+                
+                fragment.appendChild(div);
             });
+
+            // Append all elements at once
+            container.appendChild(fragment);
+            console.log("[v0] Verification list rendered successfully");
         }
 
-        // Toggle record selection
+        let renderTimeout = null;
+        function debouncedRenderVerificationList() {
+            if (renderTimeout) {
+                clearTimeout(renderTimeout);
+            }
+            renderTimeout = setTimeout(() => {
+                renderVerificationList();
+                renderTimeout = null;
+            }, 50);
+        }
+
         function toggleRecordSelection(recordId) {
+            console.log("[v0] Toggling selection for record:", recordId);
+            
             if (selectedRecords.includes(recordId)) {
                 selectedRecords = selectedRecords.filter(id => id !== recordId);
             } else {
                 selectedRecords.push(recordId);
             }
-            renderVerificationList();
+            
+            // Use debounced rendering to prevent freezing
+            debouncedRenderVerificationList();
         }
 
-        // Toggle select all
         function toggleSelectAll() {
+            console.log("[v0] Toggling select all");
+            
             if (selectedRecords.length === verificationRecords.length) {
                 selectedRecords = [];
             } else {
                 selectedRecords = verificationRecords.map(record => record.id);
             }
-            renderVerificationList();
+            
+            // Use debounced rendering to prevent freezing
+            debouncedRenderVerificationList();
         }
 
-        // Delete selected records
         function deleteSelectedRecords() {
-            verificationRecords = verificationRecords.filter(record => !selectedRecords.includes(record.id));
-            selectedRecords = [];
-            renderVerificationList();
+            console.log("[v0] Deleting selected records:", selectedRecords.length);
+            
+            try {
+                verificationRecords = verificationRecords.filter(record => !selectedRecords.includes(record.id));
+                selectedRecords = [];
+                debouncedRenderVerificationList();
+            } catch (error) {
+                console.error("[v0] Error deleting records:", error);
+            }
         }
 
-        // View record report
         function viewRecordReport(recordId) {
-            selectedRecord = verificationRecords.find(record => record.id === recordId);
-            if (selectedRecord) {
-                showScreen('verification-report');
-                renderVerificationReport();
+            console.log("[v0] Viewing report for record:", recordId);
+            
+            try {
+                selectedRecord = verificationRecords.find(record => record.id === recordId);
+                if (selectedRecord) {
+                    showScreen('verification-report');
+                    renderVerificationReport();
+                } else {
+                    console.error("[v0] Record not found:", recordId);
+                }
+            } catch (error) {
+                console.error("[v0] Error viewing report:", error);
             }
         }
 
@@ -2396,26 +2890,25 @@
             }
         }
 
-        // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // Login form
+            updateLanguage();
+            checkPersistentLogin(); // Check for persistent login
+            
+            // Login form submission
             document.getElementById('login-btn').addEventListener('click', login);
-            document.getElementById('password').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    login();
-                }
-            });
-
-            // Language toggles
+            
+            // Language toggle buttons
             document.getElementById('language-toggle-login').addEventListener('click', toggleLanguage);
-            document.getElementById('language-toggle').addEventListener('click', toggleLanguage);
             document.getElementById('language-toggle-form').addEventListener('click', toggleLanguage);
-            document.getElementById('language-toggle-list').addEventListener('click', toggleLanguage);
-            document.getElementById('language-toggle-results').addEventListener('click', toggleLanguage);
-            document.getElementById('language-toggle-report').addEventListener('click', toggleLanguage);
-
-            // Initialize
-            updateTranslations();
+            document.getElementById('language-toggle-inspection').addEventListener('click', toggleLanguage);
+            
+            // Enter key support for login
+            document.getElementById('username').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') login();
+            });
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') login();
+            });
         });
     </script>
 </body>
