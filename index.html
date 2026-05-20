@@ -35,7 +35,6 @@
             min-height: 100vh;
         }
 
-        /* Modern Right Sidebar Navigation */
         nav { 
             background-color: #0f172a; 
             width: var(--sidebar-width);
@@ -79,7 +78,6 @@
             background-color: var(--primary);
         }
 
-        /* Layout Container Adjustments for Sidebar */
         .container { 
             flex: 1;
             margin-right: var(--sidebar-width); 
@@ -127,7 +125,6 @@
             margin: 40px 0 20px;
         }
 
-        /* Hero / Welcome Home Styling */
         .hero-section {
             background: linear-gradient(135deg, #4f46e5 0%, #0c4a6e 100%);
             color: white;
@@ -153,7 +150,11 @@
             margin: 0 auto;
         }
 
-        /* Modern Card Grid Architecture */
+        .search-wrapper {
+            max-width: 500px;
+            margin: 30px auto 0 auto;
+        }
+
         .courses-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
@@ -225,7 +226,6 @@
             border-radius: 4px;
         }
 
-        /* Buttons & Forms Upgrade */
         button { 
             background-color: var(--primary); 
             color: white; 
@@ -284,6 +284,7 @@
             color: var(--text-main);
             font-size: 15px;
             transition: all 0.2s;
+            margin-bottom: 12px;
         }
         
         input:focus {
@@ -292,7 +293,6 @@
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
         }
 
-        /* Responsive Configuration */
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -330,8 +330,14 @@
 
     <div class="container">
         <div id="home" class="page active">
-            <h1>Welcome to Online Courses</h1>
-            <p style="text-align: center; font-size: 18px;">Explore our wide range of online courses and expand your knowledge today!</p>
+            <div class="hero-section">
+                <h1>Welcome to Online Courses</h1>
+                <p>Explore our wide range of online courses and expand your knowledge today!</p>
+                <div class="search-wrapper">
+                    <input type="text" id="homeSearchInput" placeholder="Search courses by title or category...">
+                </div>
+            </div>
+            <div class="courses-grid" id="homeCoursesList"></div>
         </div>
 
         <div id="courses" class="page">
@@ -343,7 +349,9 @@
             <h1>Admin Panel - Add New Course</h1>
             <form id="courseForm">
                 <input type="text" id="courseName" placeholder="Course Title" required>
-                <input type="text" id="courseCategory" placeholder="Category" required>
+                <input type="list" id="courseCategory" placeholder="Category" required>
+                <input type="text" id="instructorName" placeholder="Instructor Name" required>
+                <input type="email" id="instructorEmail" placeholder="Instructor Email" required>
                 <input type="url" id="courseImg" placeholder="Image URL" required>
                 <input type="text" id="courseDesc" placeholder="Description" required>
                 <input type="text" id="courseId" placeholder="Course ID" required>
@@ -372,6 +380,8 @@
         const db = getDatabase(app);
         const dbRef = ref(db, "courses");
 
+        let allCoursesData = {};
+
         window.showPage = function(pageName) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageName).classList.add('active');
@@ -386,43 +396,79 @@
             }
         }
 
-        onValue(dbRef, (snapshot) => {
+        function renderCourses(data, filterKeyword = '') {
+            const homeCoursesList = document.getElementById('homeCoursesList');
             const coursesList = document.getElementById('coursesList');
             const adminCoursesList = document.getElementById('adminCoursesList');
+            
+            homeCoursesList.innerHTML = '';
             coursesList.innerHTML = '';
             adminCoursesList.innerHTML = '';
             
+            const keyword = filterKeyword.toLowerCase().trim();
+
+            Object.keys(data).forEach(key => {
+                const course = data[key];
+                
+                const matchesSearch = !keyword || 
+                                      (course.name && course.name.toLowerCase().includes(keyword)) || 
+                                      (course.category && course.category.toLowerCase().includes(keyword));
+
+                const cardContent = `
+                    <img src="${course.img || 'https://via.placeholder.com/300x160'}" alt="${course.name}">
+                    <span class="category">${course.category}</span>
+                    <div class="id-badge">ID: ${key}</div>
+                    <h3>${course.name}</h3>
+                    <button onclick="alert('Description: ${course.name}: ${course.desc}\\nCategory: ${course.category}\\nInstructor: ${course.instructorName || 'N/A'} (${course.instructorEmail || 'N/A'})\\nImage: ${course.img}')">More Info</button>
+                `;
+
+                const clientCard = document.createElement('div');
+                clientCard.className = 'course-card';
+                clientCard.innerHTML = cardContent;
+                coursesList.appendChild(clientCard);
+
+                const adminCard = document.createElement('div');
+                adminCard.className = 'course-card';
+                adminCard.innerHTML = cardContent + `<button class="btn-danger" onclick="deleteCourse('${key}')">Delete</button>`;
+                adminCoursesList.appendChild(adminCard);
+
+                if (matchesSearch) {
+                    const homeCard = document.createElement('div');
+                    homeCard.className = 'course-card';
+                    homeCard.innerHTML = cardContent;
+                    homeCoursesList.appendChild(homeCard);
+                }
+            });
+        }
+
+        onValue(dbRef, (snapshot) => {
             if (snapshot.exists()) {
-                const data = snapshot.val();
-                Object.keys(data).forEach(key => {
-                    const course = data[key];
-                    const cardContent = `
-                        <img src="${course.img || 'https://via.placeholder.com/300x160'}" alt="${course.name}">
-                        <span class="category">${course.category}</span>
-                        <div class="id-badge">ID: ${key}</div>
-                        <h3>${course.name}</h3>
-                        <button onclick="alert('Description: ${course.desc}')">More Info</button>
-                    `;
-
-                    const clientCard = document.createElement('div');
-                    clientCard.className = 'course-card';
-                    clientCard.innerHTML = cardContent;
-                    coursesList.appendChild(clientCard);
-
-                    const adminCard = document.createElement('div');
-                    adminCard.className = 'course-card';
-                    adminCard.innerHTML = cardContent + `<button class="btn-danger" onclick="deleteCourse('${key}')">Delete</button>`;
-                    adminCoursesList.appendChild(adminCard);
-                });
+                allCoursesData = snapshot.val();
+                const currentSearchValue = document.getElementById('homeSearchInput').value;
+                renderCourses(allCoursesData, currentSearchValue);
+            } else {
+                allCoursesData = {};
+                document.getElementById('homeCoursesList').innerHTML = '';
+                document.getElementById('coursesList').innerHTML = '';
+                document.getElementById('adminCoursesList').innerHTML = '';
             }
         });
+
+        document.getElementById('homeSearchInput').addEventListener('input', (e) => {
+            renderCourses(allCoursesData, e.target.value);
+        });
+
         window.addCourse = function() {
             const name = document.getElementById('courseName').value;
             const category = document.getElementById('courseCategory').value;
+            const instructorName = document.getElementById('instructorName').value;
+            const instructorEmail = document.getElementById('instructorEmail').value;
             const img = document.getElementById('courseImg').value;
             const desc = document.getElementById('courseDesc').value;
-            if (name && category && img && desc) {
-                push(dbRef, { name, category, img, desc });
+            const id = document.getElementById('courseId').value;
+            
+            if (name && category && instructorName && instructorEmail && img && desc && id) {
+                push(dbRef, { name, category, instructorName, instructorEmail, img, desc, id });
                 document.getElementById('courseForm').reset();
             } else {
                 alert("Please fill in all fields.");
